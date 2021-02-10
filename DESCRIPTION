@@ -41,6 +41,8 @@ Imports:
     broom,
     ggplot2,
     abdiv,
+    SingleCellExperiment,
+    SummarizedExperiment,
     stats,
     ggrepel,
     scales
