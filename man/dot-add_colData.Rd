@@ -21,3 +21,6 @@ SCE object with amended colData entries
 \description{
 Add additional entries to the colData of an SCE
 }
+\author{
+Friederike Dündar
+}

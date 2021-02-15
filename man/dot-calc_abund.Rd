@@ -21,3 +21,6 @@ data.frame
 \description{
 Calculate clonotype abundance
 }
+\author{
+djvdj authors
+}

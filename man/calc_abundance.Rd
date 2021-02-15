@@ -31,3 +31,6 @@ Seurat object with clonotype abundance added to meta.data
 \description{
 Calculate clonotype abundance
 }
+\author{
+djvdj authors
+}
