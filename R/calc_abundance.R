@@ -9,19 +9,14 @@
 #' summarizing the results is returned.
 #' @return Seurat object with clonotype abundance added to meta.data
 #' @import SingleCellExperiment
+#' @author djvdj authors
 #' @export
 calc_abundance <- function(SCE_in, clonotype_col = "cdr3_nt", cluster_col = NULL,
     prefix = "", return_SCE = TRUE) {
 
     # Format meta.data
-    meta_df <- colData(SCE_in)
-    meta_df <- tibble::as_tibble(meta_df, rownames = ".cell_id")
-    meta_df <- dplyr::filter(meta_df, !is.na(!!sym(clonotype_col)))
-
-    meta_df <- dplyr::select(
-        meta_df,
-        .data$.cell_id, all_of(c(cluster_col, clonotype_col))
-    )
+    meta_df <- .extract_colData(SCE_in, clonotype_col)
+    meta_df <- dplyr::select(meta_df, .data$.cell_id, all_of(c(cluster_col, clonotype_col)))
 
     # Calculate clonotype abundance
     meta_df <- .calc_abund(
@@ -70,6 +65,7 @@ calc_abundance <- function(SCE_in, clonotype_col = "cdr3_nt", cluster_col = NULL
 #' @param cell_col Column containing cell IDs
 #' @param clone_col Column containing clonotype IDs
 #' @param clust_col Column containing cluster IDs
+#' @author djvdj authors
 #' @return data.frame
 .calc_abund <- function(df_in, cell_col, clone_col, clust_col = NULL) {
 

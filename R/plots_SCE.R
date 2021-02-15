@@ -1,3 +1,74 @@
+#' Plot repertoire overlap
+#'
+#' @param sce_in SCE object containing V(D)J data or matrix containing
+#' similarity values to plot
+#' @param clonotype_col meta.data column containing clonotype IDs to use for
+#' calculating overlap
+#' @param cluster_col meta.data column containing cluster IDs to use for
+#' calculating overlap. Any grouping column from colData(SCE_in) will do.
+#' @param method Method to use for calculating similarity between clusters
+#' @param plot_colors Character vector containing colors for plotting
+#' @param ... Additional arguments to pass to ggplot
+#' @author djvdj authors
+#' @return ggplot object
+#' @export
+plot_similarity <- function(SCE_in, clonotype_col = "cdr3_nt", cluster_col,
+    method = abdiv::jaccard,
+    plot_colors = NULL, ...) {
+
+    # Calculate similarity
+    if ("SingleCellExperiment" %in% class(SCE_in)) {
+        if (is.null(clonotype_col) || is.null(cluster_col)) {
+            stop("If an SCE object is provided, clonotype_col and cluster_col must be specified.")
+        }
+
+        SCE_in <- calc_similarity(
+            SCE_in       = SCE_in,
+            clonotype_col = clonotype_col,
+            cluster_col   = cluster_col,
+            method        = method,
+            prefix        = "",
+            return_SCE =  FALSE
+        )
+    }
+
+    sim_col <- as.character(substitute(method))
+    sim_col <- dplyr::last(sim_col)
+
+    var_lvls <- unique(c(rownames(SCE_in), colnames(SCE_in)))
+    var_lvls <- sort(var_lvls)
+
+    gg_df <- tibble::as_tibble(SCE_in, rownames = "Var1")
+
+    gg_df <- tidyr::pivot_longer(
+        gg_df,
+        cols      = -.data$Var1,
+        names_to  = "Var2",
+        values_to = sim_col
+    )
+
+    # Set Var levels
+    gg_df <- dplyr::mutate(
+        gg_df,
+        Var1 = factor(.data$Var1, levels = rev(var_lvls)),
+        Var2 = factor(.data$Var2, levels = var_lvls)
+    )
+
+    # Create heatmap
+    res <- .create_heatmap(
+        gg_df,
+        x     = "Var1",
+        y     = "Var2",
+        .fill = sim_col,
+        clrs  = plot_colors,
+        ...
+    )
+
+    res
+}
+
+
+
 #' Plot clonotype abundance
 #'
 #' @param SCE_in Seurat object containing V(D)J data

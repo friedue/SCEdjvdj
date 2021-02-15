@@ -4,6 +4,7 @@
 #' @param merge_on Indicate the column of \code{to_add}, which should contain the
 #' entries corresponding to the colnames(SCE.in). Default: NULL, which will use
 #'  rownames of the \code{to_add} df.
+#' @author Friederike Dündar
 #' @return SCE object with amended colData entries
 #' @import SingleCellExperiment
 .add_colData <- function(SCE.in, to_add, merge_on = NULL){
@@ -40,4 +41,13 @@
     colData(sce.out) <- DataFrame(cd.out[colnames(sce.out),])
     return(sce.out)
 
+}
+
+
+.extract_colData <- function(SCE_in, clonotype_col){
+    met_df <- as.data.frame(colData(SCE_in))
+    met_df <- tibble::as_tibble(met_df, rownames = ".cell_id")
+    met_df <- dplyr::filter(met_df, !is.na(!!sym(clonotype_col)))
+
+    return(met_df)
 }
