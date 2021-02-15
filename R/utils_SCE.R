@@ -16,14 +16,22 @@
         cnames <- to_add[, merge_on, drop=TRUE]
     }
     if(!all(cnames %in% colnames(SCE.in))){stop("The rownames/merge_on entries
-        of the data.frame to be added aren't all part of the SCE")}
+        of the data.frame to be added aren't all part of the colnames of the SCE")}
     if(!all(colnames(SCE.in) %in% cnames)){message("There are more cells in the
         SCE object than entries in the df; there will be NAs in the resulting colData")}
 
     cd <- colData(SCE.in)
-    cd$MERGE <- colnames(SCE.in)
     to_add$MERGE <- cnames
-
+    if(!is.null(merge_on) && merge_on %in% names(cd)){
+        to_add[, merge_on] <- NULL
+    }
+    cdnames <- names(to_add)
+    dblnms <- cdnames[cdnames %in% names(cd)]
+    if(length(dblnms > 0)){
+        cdnames[cdnames %in% dblnms] <- paste0(dblnms, ".y")
+        names(to_add) <- cdnames
+    }
+    cd$MERGE <- colnames(SCE.in)
     cd.out <- merge(cd, to_add, by = "MERGE", all.x = TRUE)
     rownames(cd.out) <- cd.out$MERGE
     cd.out$MERGE <- NULL
