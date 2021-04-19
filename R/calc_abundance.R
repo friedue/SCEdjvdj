@@ -1,6 +1,6 @@
 #' Calculate clonotype abundance
 #'
-#' @param SCE_in SCE object containing V(D)J data
+#' @param SCE_in SCE object containing V(D)J data (or data.frame'able object)
 #' @param clonotype_col meta.data column containing clonotype IDs
 #' @param cluster_col meta.data column containing cluster IDs to use for
 #' grouping cells when calculating clonotype abundance
@@ -15,7 +15,13 @@ calc_abundance <- function(SCE_in, clonotype_col = "cdr3_nt", cluster_col = NULL
     prefix = "", return_SCE = TRUE) {
 
     # Format meta.data
-    meta_df <- .extract_colData(SCE_in, clonotype_col)
+    if(any(class(SCE_in) == "SingleCellExperiment")){
+        meta_df <- .extract_colData(SCE_in, clonotype_col)
+    }else{
+        meta_df <- as.data.frame(SCE_in)
+        meta_df <- .wrestle_tcr_df(meta_df, clonotype_col)
+        return_SCE <- FALSE
+    }
     meta_df <- dplyr::select(meta_df, .data$.cell_id, all_of(c(cluster_col, clonotype_col)))
 
     # Calculate clonotype abundance
@@ -53,7 +59,11 @@ calc_abundance <- function(SCE_in, clonotype_col = "cdr3_nt", cluster_col = NULL
 
     meta_df <- tibble::column_to_rownames(meta_df, ".cell_id")
 
-    res <- .add_colData(SCE_in, meta_df)#Seurat::AddMetaData(SCE_in, metadata = meta_df)
+    if(return_SCE==TRUE){
+        res <- .add_colData(SCE_in, meta_df)#Seurat::AddMetaData(SCE_in, metadata = meta_df)
+    }else{
+        res <- meta_df
+    }
 
     return(res)
 }

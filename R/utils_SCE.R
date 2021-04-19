@@ -51,3 +51,11 @@
 
     return(met_df)
 }
+
+.wrestle_tcr_df <- function(tcr_df, clonotype_col){
+
+    met_df <- tibble::as_tibble(tcr_df, rownames = ".cell_id")
+    met_df <- dplyr::filter(met_df, !is.na(!!sym(clonotype_col)))
+
+    return(met_df)
+}
